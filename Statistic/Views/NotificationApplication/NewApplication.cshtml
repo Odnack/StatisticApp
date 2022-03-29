@@ -1,0 +1,28 @@
+﻿@model ApplicationAddingDto
+@{
+    ViewData["SignupActive"] = "";
+    ViewData["LoginActive"] = "";
+    ViewData["HomeActive"] = "";
+}
+<div class="position-absolute top-50 start-50 translate-middle border border-primary border-5 rounded p-5">
+    <form method="post" asp-action="NewApplication" asp-controller="NotificationApplication" onsubmit="return CheckName();">
+        <div class=" position-relative top-50 start-50 translate-middle badge bg-primary text-wrap mb-3 fs-3 align-middle ">
+            Add new application
+        </div>
+        <div>
+            <div class="form-floating mb-3">
+                <input asp-for="Name"  class="form-control" id="applicationName" placeholder="Name" onchange="CheckName">
+                <label >Name</label>
+            </div>
+        </div>
+        <div>
+            <div class="form-floating mb-3">
+                <textarea asp-for="Description" class="form-control" id="applicationDescription" placeholder="Description" rows="3"></textarea>
+                <label for="applicationDescription" class="form-label">Description</label>
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-outline-primary w-100">Add</button>
+        </div>
+    </form>
+</div>

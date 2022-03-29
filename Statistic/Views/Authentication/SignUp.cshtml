@@ -1,0 +1,40 @@
+﻿@model RegisterUserDto
+@{
+    Layout = "_Layout";
+    ViewData["SignupActive"] = "active";
+    ViewData["LoginActive"] = "";
+    ViewData["HomeActive"] = "";
+}
+<div class="position-absolute top-50 start-50 translate-middle border border-primary border-5 rounded p-5">
+    <form method="post" asp-action="SignUp" asp-controller="Authentication" onsubmit="return SubmitCheck();">
+        <div class=" position-relative top-50 start-50 translate-middle badge bg-primary text-wrap mb-3 fs-3 align-middle ">
+            Register
+        </div>
+        <div>
+            @if (ViewData["RegistrationErrorCode"] == "-1")
+            {
+                <div style="color: red;" id="emailError">User with this email already exists</div>
+            }
+            <div class="hidden-red" id="emailError">Not a valid email address</div>
+            <div class="form-floating mb-3">
+                <input asp-for="Email" type="email" class="form-control" id="registerEmail" placeholder="name@example.com" onchange="ValidEmail()">
+                <label for="registerEmail">Email address</label>
+            </div>
+        </div>
+        <div>
+            <div class="hidden-red" id="passwordMatchError">Passwords must match</div>
+            <div class="hidden-red" id="passwordEmptyError">The passwords cannot be empty</div>
+            <div class="form-floating">
+                <input asp-for="Password" type="password" class="form-control" id="registerPassword" placeholder="Password">
+                <label for="registerPassword">Password</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" id="registerVerifyPassword" placeholder="VerifyPassword" onchange="PaswordMatch()">
+                <label for="registerVerifyPassword">Verify Password</label>
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-outline-primary w-100">Register</button>
+        </div>
+    </form>
+</div>

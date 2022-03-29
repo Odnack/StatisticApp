@@ -1,0 +1,33 @@
+﻿@model LoginInDto
+@{
+    Layout = "_Layout";
+    ViewData["SignupActive"] = "";
+    ViewData["LoginActive"] = "active";
+    ViewData["HomeActive"] = "";
+}
+<div class="position-absolute top-50 start-50 translate-middle border border-primary border-5 rounded p-5">
+    <form method="post" asp-action="Login" asp-controller="Authentication">
+        <div class=" position-relative top-50 start-50 translate-middle badge bg-primary text-wrap mb-3 fs-3 align-middle ">
+            Login
+        </div>
+        @if (Convert.ToBoolean(ViewData["LoginError"]))
+        {
+    <div style="color: red;" id="emailError">Wrong data</div>
+        }
+        <div>
+            <div class="form-floating mb-3">
+                <input asp-for="Email" type="email" class="form-control" id="loginEmail" placeholder="name@example.com" onchange="ValidEmail()">
+                <label for="loginEmail">Email address</label>
+            </div>
+        </div>
+        <div>
+            <div class="form-floating mb-3">
+                <input asp-for="Password" type="password" class="form-control" id="loginPassword" placeholder="Password">
+                <label for="loginPassword">Password</label>
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-outline-primary w-100">Login</button>
+        </div>
+    </form>
+</div>
