@@ -8,9 +8,6 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["Statistic/Statistic.csproj", "Statistic/"]
-COPY ["Dblayer/DbLayer.csproj", "Dblayer/"]
-COPY ["BackendCore/BackendCore.csproj", "BackendCore/"]
-COPY ["Api/Api.csproj", "Api/"]
 RUN dotnet restore "Statistic/Statistic.csproj"
 COPY . .
 WORKDIR "/src/Statistic"
