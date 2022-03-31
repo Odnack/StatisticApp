@@ -5,24 +5,25 @@
     ViewData["HomeActive"] = "";
 }
 <div class="position-absolute top-50 start-50 translate-middle border border-primary border-5 rounded p-5">
-    <form method="post" asp-action="NewApplication" asp-controller="NotificationApplication" onsubmit="return CheckName();">
+    <form method="post" asp-action="AddNewApplication" asp-controller="NotificationApplication" onsubmit="return CheckName();">
         <div class=" position-relative top-50 start-50 translate-middle badge bg-primary text-wrap mb-3 fs-3 align-middle ">
-            Add new application
+            Добавить новое приложение
         </div>
         <div>
+            <div class="hidden-red" id="applicationNameError">Имя не может быть пустым</div>
             <div class="form-floating mb-3">
-                <input asp-for="Name"  class="form-control" id="applicationName" placeholder="Name" onchange="CheckName">
-                <label >Name</label>
+                <input asp-for="Name" class="form-control" id="applicationName" onchange="CheckName()" placeholder="Name" onchange="CheckName">
+                <label>Название</label>
             </div>
         </div>
         <div>
             <div class="form-floating mb-3">
                 <textarea asp-for="Description" class="form-control" id="applicationDescription" placeholder="Description" rows="3"></textarea>
-                <label for="applicationDescription" class="form-label">Description</label>
+                <label for="applicationDescription" class="form-label">Описание</label>
             </div>
         </div>
         <div>
-            <button type="submit" class="btn btn-outline-primary w-100">Add</button>
+            <button type="submit" class="btn btn-outline-primary w-100">Добавить</button>
         </div>
     </form>
 </div>

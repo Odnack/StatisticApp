@@ -54,13 +54,12 @@ namespace Statistic
             {
                 AppSettings = services.GetAppsettings(Configuration);
                 services.AddDatabase(AppSettings);
+                services.AddControllersWithViews();
                 services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {
-                        options.LoginPath = new PathString("/Authentication/LogIn");
-                        options.LogoutPath = new PathString("/Authentication/LogOut");
+                        options.LoginPath = "/authentication/login";
                     });
-                services.AddControllersWithViews();
                 ServicesExtension.AddLog(AppSettings);
                 Log.Information("Web service started.");
                 Log.Information(Environment.EnvironmentName);
@@ -83,11 +82,6 @@ namespace Statistic
             {
                 app.UseDeveloperExceptionPage();
             }
-            var cookiePolicyOptions = new CookiePolicyOptions
-            {
-                MinimumSameSitePolicy = SameSiteMode.Strict,
-            };
-            app.UseCookiePolicy(cookiePolicyOptions);
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -100,7 +94,7 @@ namespace Statistic
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Authentication}/{action=LogIn}/{id?}");
             });
         }
     }

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Api.Api;
 using Api.Api.Notifications.Application;
@@ -11,39 +13,68 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 namespace Statistic.Controllers
 {
     [Route("Application")]
-    [Authorize]
     public class NotificationApplicationController : BaseController, INotificationApplicationService
     {
         private INotificationApplicationService NotificationApplication => BackendApi.Notifications.Applications;
         public NotificationApplicationController(IBackendApi backendApi) : base(backendApi) { }
 
         [HttpGet]
-        public IActionResult NewApplication()
+        public IActionResult AddNewApplication()
         {
-            return View();
+            if (User.Identity.IsAuthenticated)
+                return View();
+            return RedirectToAction("LogIn", "Authentication");
         }
         [HttpPost]
-        public IActionResult NewApplication(ApplicationAddingDto inData)
+        public async Task<IActionResult> AddNewApplication(ApplicationAddingDto inData)
         {
-            return View();
+            if (!User.Identity.IsAuthenticated)
+                return View();
+            inData.UserId = ClientId;
+            var result = await NotificationApplication.AddNewApplication(inData);
+            if (result is OkObjectResult okObject)
+            {
+                var application = okObject.Value as ApplicationDto;
+                return View("Success", application);
+            }
+            return View("Error");
         }
-        public IActionResult Statistic()
+        [HttpGet]
+        [Route("Statistic")]
+        public async Task<IActionResult> GetApplicationsByUserId(int userId)
         {
-            return View();
-        }
-        public async Task<ApplicationDto> AddNewApplication(ApplicationAddingDto inData)
-        {
-            return await NotificationApplication.AddNewApplication(inData);
+            if (!User.Identity.IsAuthenticated)
+                return RedirectToAction("LogIn", "Authentication");
+            userId = ClientId;
+            var result = await NotificationApplication.GetApplicationsByUserId(userId);
+
+            if (result is OkObjectResult okObject)
+            {
+                var applications = okObject.Value as List<ApplicationDto>;
+                var count = 0;
+                foreach (var application in applications)
+                {
+                    count += application.Views;
+                }
+
+                ViewBag.ViewCount = count;
+                return View("Statistic", applications);
+            }
+            return View("Error");
         }
 
-        public async Task<ApplicationDto> GetApplicationById(int applicationId)
+        public async Task<int> GetApplicationCountByUserId(int userId)
         {
-            return await NotificationApplication.GetApplicationById(applicationId);
+            return await NotificationApplication.GetApplicationCountByUserId(userId);
         }
 
-        public async Task<List<ApplicationDto>> GetApplicationsByUserId(int userId)
+        [HttpGet]
+        [Route("Home")]
+        public async Task<IActionResult> HomePage()
         {
-            return await NotificationApplication.GetApplicationsByUserId(userId);
+            if (!User.Identity.IsAuthenticated) return View("HomePage");
+            ViewBag.ApplicationCount = await GetApplicationCountByUserId(ClientId);
+            return View("HomePage");
         }
     }
 }

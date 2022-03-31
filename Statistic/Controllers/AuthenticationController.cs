@@ -1,111 +1,87 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Api.Api;
-using Api.Api.Authentication;
 using Api.Api.Authentication.Dto;
+using DbLayer.Tables.Public;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Statistic.Helpers;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using IAuthenticationService = Api.Api.Authentication.IAuthenticationService;
 
 
 namespace Statistic.Controllers
 {
-    [Authorize]
-    public class AuthenticationController : BaseController, Api.Api.Authentication.IAuthenticationService
+    public class AuthenticationController : BaseController, IAuthenticationService
     {
-        private Api.Api.Authentication.IAuthenticationService Authentication => BackendApi.Authentication;
-        private Api.Api.Authentication.IAuthenticationService AuthenticationAnonymous => BackendApiAnonymous.Authentication;
+        private IAuthenticationService Authentication => BackendApi.Authentication;
         public AuthenticationController(IBackendApi backendApi) : base(backendApi)
         {
         }
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult SignUp()
         {
             if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
+                return RedirectToAction("HomePage", "NotificationApplication");
             return View();
-        }
-        public async Task<int> RegisterUser(RegisterUserDto inData)
-        {
-            var result = await Authentication.RegisterUser(inData);
-            
-            return result;
         }
         [HttpPost]
         public async Task<IActionResult> SignUp(RegisterUserDto inData)
         {
-            var result = await RegisterUser(inData);
-            if (result == -1)
+            var result = await Authentication.SignUp(inData);
+            if (result is OkObjectResult okObject)
             {
-                ViewData["RegistrationErrorCode"] = "-1";
-                return View();
+                var user = okObject.Value as User;
+                return await LogIn(new LoginInDto(){Email = user.Email, Password = user.Password});
             }
-
-            return await LogIn(new LoginInDto() {Email = inData.Email, Password = inData.Password});
+            ViewData["RegistrationErrorCode"] = "-1";
+            return View();
         }
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult LogIn()
         {
             if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
+             return RedirectToAction("HomePage", "NotificationApplication");
+            
             return View();
         }
         [HttpPost]
         public async Task<IActionResult> LogIn(LoginInDto inDto)
         {
-            var result = Login(inDto).Result;
-            if (result == null)
+            var result = await Authentication.LogIn(inDto);
+            if (result is OkObjectResult okObject)
             {
-                ViewData["LoginError"] = true;
-                return View();
+                var user = okObject.Value as LoginOutDto;
+                await Authenticate(user);
+                return RedirectToAction("HomePage", "NotificationApplication");
             }
-            await Authenticate(inDto.Email);
-            return RedirectToAction("Index", "Home");
+            ViewData["LoginError"] = true;
+            return View();
         }
-        public async Task<LoginOutDto> Login(LoginInDto inDto)
+        [HttpGet]
+        public async Task<IActionResult> SignOut()
         {
-            var result = await AuthenticationAnonymous.Login(inDto);
-            
-            return result;
+            if (User.Identity.IsAuthenticated)
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("HomePage", "NotificationApplication");
         }
-
-        public async Task<List<UserDto>> GetUsers()
+        private async Task Authenticate(LoginOutDto user)
         {
-            return await Authentication.GetUsers();
-        }
-
-        public async Task<UserDto> GetUser(int userId)
-        {
-            return await Authentication.GetUser(userId);
-        }
-        public async Task<IActionResult> LogOut()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home"); 
-        }
-        private async Task Authenticate(string userName)
-        {
-            var claims = new List<Claim>
+            var claims = new List<Claim>()
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
+                new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.UserId)),
+                new Claim(ClaimTypes.Name, user.Email)
             };
-            ClaimsIdentity id = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var authProperties = new AuthenticationProperties
-            {
-                AllowRefresh = true
-            };
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id), authProperties);
+            var scheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            var identity = new ClaimsIdentity(claims, scheme);
+            var principal = new ClaimsPrincipal(identity);
+            var properties = new AuthenticationProperties() { IsPersistent = true };
+            await HttpContext.SignInAsync(scheme, principal, properties);
         }
     }
 }

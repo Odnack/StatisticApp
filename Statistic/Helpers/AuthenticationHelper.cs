@@ -14,7 +14,7 @@ namespace Statistic.Helpers
         }
         public static int GetId(this ClaimsPrincipal user)
         {
-            var value = user.GetClaim(ClaimTypes.Name);
+            var value = user.GetClaim(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(value))
                 return 0;
             return int.Parse(value);

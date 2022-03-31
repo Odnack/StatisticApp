@@ -1,5 +1,30 @@
-﻿@{
+﻿@model IEnumerable<ApplicationDto>
+@{
     ViewData["SignupActive"] = "";
     ViewData["LoginActive"] = "";
     ViewData["HomeActive"] = "";
 }
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <td scope="col">Уникальный номер приложения</td>
+            <td scope="col">Название приложения</td>
+            <td scope="col">Описание приложения</td>
+            <td scope="col">Количество просмотров</td>
+            <td scope="col">Дата создания</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var application in Model)
+        {
+            <tr>
+                <td scope="row">@application.Id</td>
+                <td>@application.Name</td>
+                <td>@application.Description</td>
+                <td>@application.Views</td>
+                <td>@application.CreationDate</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

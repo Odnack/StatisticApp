@@ -60,6 +60,9 @@ namespace DbLayer.Context
                 entity.Property(e => e.Description)
                     .HasColumnName("Description");
 
+                entity.Property(e => e.UserId)
+                    .HasColumnName("userid");
+
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Applications)
                     .HasForeignKey(d => d.UserId)

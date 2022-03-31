@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Api.Api.Authentication.Dto;
+using BackendCore.Authentication;
 using Serilog;
 
 namespace BackendCore.Helpers
@@ -8,7 +9,7 @@ namespace BackendCore.Helpers
     public class DefaultDbCreator
     {
         private readonly BackendCore _core;
-        private readonly Authentication.AuthenticationService _authentication;
+        private readonly AuthenticationService _authentication;
         public DefaultDbCreator(BackendCore core)
         {
             _core = core;
